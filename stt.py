@@ -4,13 +4,10 @@ from time import sleep
 
 class STT:
 
-    def __init__(self, callback=None):
+    def __init__(self):
         self.p = pyaudio.PyAudio()
 
-        if callback:
-            self.listenCallback = callback
-            print("STT initialized with callback")
-
+        self.listenCallback = None
         self.deviceIndex = -1
         for i in range(self.p.get_device_count()):
             device = self.p.get_device_info_by_index(i)
@@ -20,7 +17,6 @@ class STT:
                 print("Found microphone at index", i)
                 break
 
-    listenCallback = None
     
     def defaultListenCallback(self, recognizer, audio):                          # this is called from the background thread
         try:
@@ -28,11 +24,11 @@ class STT:
             print("You said " + phrase)  # received audio data, now need to recognize it
             if self.listenCallback:
                 self.listenCallback(phrase)
-                print("Callback called")
-                self.stopListening()
-                print("Listening stopped")
-                self.listen()
-                print("Listening restarted")
+                # print("Callback called")
+                # self.stopListening()
+                # print("Listening stopped")
+                # self.listen()
+                # # print("Listening restarted")
 
         except LookupError:
             print("Oops! Didn't catch that")
@@ -40,12 +36,16 @@ class STT:
         except sr.UnknownValueError:
             print("Google Speech Recognition could not understand the audio.")
 
-    def listen(self):
+
+    def listen(self, callback=None):
+
+        self.listenCallback = callback
         r = sr.Recognizer()
         m = sr.Microphone(device_index=self.deviceIndex)
         with m as source: r.adjust_for_ambient_noise(source)      # we only need to calibrate once, before we start listening
         self.killListener = r.listen_in_background(m, self.defaultListenCallback)
         print("Listening...")
+
 
     def stopListening(self):
         if self.killListener:
