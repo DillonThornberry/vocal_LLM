@@ -9,13 +9,22 @@ class STT:
 
         self.listenCallback = None
         self.deviceIndex = -1
+
         for i in range(self.p.get_device_count()):
             device = self.p.get_device_info_by_index(i)
+            print(i, device['name'])
 
-            if device['name'] == 'Microphone (Scarlett 2i2 USB)':
-                self.deviceIndex = i
-                print("Found microphone at index", i)
-                break
+        choice = input("\nEnter the index of the microphone: ")
+
+        self.deviceIndex = int(choice)
+        
+        # for i in range(self.p.get_device_count()):
+        #     device = self.p.get_device_info_by_index(i)
+
+        #     if device['name'] == 'Microphone (Scarlett 2i2 USB)':
+        #         self.deviceIndex = i
+        #         print("Found microphone at index", i)
+        #         break
 
     
     def defaultListenCallback(self, recognizer, audio):                          # this is called from the background thread
@@ -38,7 +47,9 @@ class STT:
 
 
     def listen(self, callback=None):
-
+        if self.deviceIndex == -1:
+            print("No microphone found")
+            return
         self.listenCallback = callback
         r = sr.Recognizer()
         m = sr.Microphone(device_index=self.deviceIndex)
